@@ -1,10 +1,25 @@
-
-
-//
 //  FILE: Codice Incubatore: CO2 e  Temperatura controllata
-//  AUTHOR:Federica 
+//  AUTHOR: Federica 
 // 
-//    DATE: 07-22
+//  DATE: 07-22
+/* This is an edited code by L. Bontempi, G. Noya, G. De Franceschi, M.Marras C. Russo and A. Sparapani 
+   within the scope of the Capstone Projects (PoliMi, 2023, professor Jacchetti). 
+   We were asked by MgShell to include a pH sensor in the current incubator setup, we are adding a
+   pH microprobe by Atlas Scientific, and reading it through Arduino. Our code simply adds the reading 
+   of this latter sensor to the LCD display
+*/
+
+/* ***************** CODE DESCRIPTION ********************
+
+This Arduino code is for controlling an incubator with controlled CO2 and temperature. The code initializes various libraries and defines global 
+variables such as the threshold for CO2, the solenoid relay pin, and the pins for the keypad. In the setup function, the code initializes various 
+sensors and sets up the LCD display. In the loop function, the code reads data from the CO2 sensor, DHT11 temperature and humidity sensor, 
+and updates the LCD display with the readings. The code also checks if the CO2 level is below a certain threshold and turns on the solenoid relay 
+to add more CO2 if necessary. The code also uses a keypad to update the CO2 threshold and other settings. The code also includes a timer to keep 
+track of the time since the Arduino was turned on.
+
+
+*/
 /*
 *Arduino MEGA2560 Pin Connections:
 
@@ -20,10 +35,9 @@ rowPins_m[4] # 33, 35, 37,39 : connect to the row pinouts of the keypad
 colPins_m[1] # 47: connect to the column pinouts of the keypad
 */
 
+// Librerie 
 
-// Librerie sensori 
-
-#include <cozir.h>
+#include <cozir.h> // management of CO2 sensor, which is a COZIR sensor 
 #include <SoftwareSerial.h>
  
 
@@ -32,19 +46,18 @@ SoftwareSerial sws(12, 13);
 COZIR czr(&sws);
 
 
-#include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+#include <LiquidCrystal_I2C.h> // manages communication with LCD crystal that uses I2C protocol (has lcd variable type already defined inside)
+LiquidCrystal_I2C lcd(0x27, 16, 2); // NB LCD display communicates with Arduino with I2C protocol! 
 #include <Keypad.h>
 
-#include <DHT.h>
+#include <DHT.h> // management of DHT series sensors 
 #include <DHT_U.h>
 DHT dht(2, DHT11);
 
 
-//Variabili globali:
-
-float soglia = 4.90;
-float CO2Threshold = 0.60; // Threshold per passare al controllo stepping in% / 100
+/*GLOBAL VARIABLES:*/
+float soglia = 4.90; // what is this referring to? 
+float CO2Threshold = 0.60; // Threshold per passare al controllo stepping in % / 100
 float multiplier = 0.001;// Converione ppm-->% (10/10000) (Hardware multiplier/conversione ppm).
 int SolenoidOnTime = 1000;
 int SolenoidOnTime2 = 5000;
@@ -55,7 +68,7 @@ float tempo;
 int count;
 float tempo_riempimento; //definisco la variabile che mi serve per contare il tempo dall'accensione di arduino
 
-
+// rows and columns of the LCD display
 const byte ROWS = 4; // numero di righe
 const byte COLS = 3; // numero di colonne
 
@@ -98,7 +111,7 @@ float dueore=2*60*60000; //limite di due ore da collegare al conteggio della fun
 
 
 void setup() {
-   Serial.begin(9600);
+  Serial.begin(9600); // baudrate a 9600
   sws.begin(9600);
   czr.init();
   lcd.init();
@@ -108,7 +121,7 @@ void setup() {
   pinMode(pin_v, OUTPUT);
   pinMode(solenoide, OUTPUT);
   delay(1000);
- lcd.noAutoscroll();
+  lcd.noAutoscroll();
   lcd.print("INCUBATORE CO2");
   delay(500);
   lcd.clear();
@@ -130,7 +143,7 @@ void setup() {
 
 void loop() {
 
-  tempo_riempimento = millis(); //inizio il conteggio del tempo
+  tempo_riempimento = millis(); //inizio il conteggio del tempo , returns the number of milliseconds since the arduino board was powered or reset, 32-bit unsigned int (enough for our times)
  
      float c = czr.CO2()*multiplier;
           lcd.clear();
@@ -175,9 +188,6 @@ void loop() {
            //delay(SolenoidOnTime);
            // digitalWrite(solenoide, HIGH);
            //digitalWrite(pin_r,HIGH);
-            
-                                 
-            
           } 
           if (c < soglia && c >= CO2Threshold*soglia) {  //*********************    Soglia minore   ***********************//
            
@@ -185,7 +195,6 @@ void loop() {
             delay(SolenoidOnTime2);
             digitalWrite(solenoide, HIGH);
             digitalWrite(pin_r,HIGH);
-            
           } 
 
             if (c >= soglia){                            //*********************    Soglia maggiore   *********************//
@@ -198,8 +207,6 @@ void loop() {
           if (c!=0 && tempo_riempimento >= dueore && c <= 3.5) {
            
               digitalWrite(solenoide, LOW);//chiuso
-        
-           
           }
           
           }
@@ -207,55 +214,52 @@ void loop() {
             count++;
             Serial.print(" zeri= ");
             Serial.println(count);
-            }
-             delay(1000);
+          }
+          delay(1000);// one reading each second
           
-  // put your main code here, to run repeatedly:
- updateLCD();
+          // put your main code here, to run repeatedly:  
+          updateLCD();
 }
 
 // Funzione per aggiornare il display LCD
-  void updateLCD() {
-float c = czr.CO2()*multiplier;
-          lcd.clear();
-          lcd.setCursor(0, 0);
-          lcd.print("CO2:");
-          lcd.setCursor(5, 0); 
-          lcd.print(c);
-          lcd.print("%");
-          lcd.setCursor(11, 0); 
-          lcd.print(soglia);
-          lcd.print("%"); 
-                  
-//float t=sensors.getTempCByIndex(0);
- float t = dht.readTemperature(); 
-          lcd.setCursor(0, 1);
-          lcd.print("T:"); 
-          lcd.setCursor(2, 1);  
-          lcd.print(t);
-          lcd.print(" C");
+void updateLCD() {
+          float c = czr.CO2()*multiplier;
+                    lcd.clear();
+                    lcd.setCursor(0, 0);
+                    lcd.print("CO2:");
+                    lcd.setCursor(5, 0); 
+                    lcd.print(c);
+                    lcd.print("%");
+                    lcd.setCursor(11, 0); 
+                    lcd.print(soglia);
+                    lcd.print("%"); 
+                            
+          //float t=sensors.getTempCByIndex(0);
+          float t = dht.readTemperature(); 
+                    lcd.setCursor(0, 1);
+                    lcd.print("T:"); 
+                    lcd.setCursor(2, 1);  
+                    lcd.print(t);
+                    lcd.print(" C");
 
- int h = dht.readHumidity();
-          lcd.setCursor(10, 1);
-          lcd.print("U:"); 
-          lcd.setCursor(12, 1);  
-          lcd.print(h);
-          lcd.print("%");
-          
-//}
+          int h = dht.readHumidity();
+                    lcd.setCursor(10, 1);
+                    lcd.print("U:"); 
+                    lcd.setCursor(12, 1);  
+                    lcd.print(h);
+                    lcd.print("%");
 
-//void SerialPrintResults() {
+          /* Print results also on the serial monitor for debugging purposes! */
+                  //*********************          CO2              *********************
+              
+                  Serial.print(" CO2 = ");        
+                  Serial.print(c);
+                  //*********************          TEMPERATURA               *********************
 
-        //*********************          CO2              *********************
-    
-        Serial.print(" CO2 = ");        
-        Serial.print(c);
-        //*********************          TEMPERATURA               *********************
+                  Serial.print(" Temp= ");
+                  Serial.print(t);
 
-          Serial.print(" Temp= ");
-          Serial.print(t);
-
-           Serial.print(" Umid= ");
-           Serial.println(h);
-           }
+                  Serial.print(" Umid= ");
+                  Serial.println(h);
+}
            
