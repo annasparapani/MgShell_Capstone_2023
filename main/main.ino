@@ -36,21 +36,33 @@ void loop() {
 
   delay(2000); // wait untill the pump has fully stopped
   if (valves_linked) {
-    e_valves.turnOFF();
+    e_valves.turnOFF(); // close the circuit to hold the liquid level
   };
    // turn off the valve
 
   // DEACTIVATE WHILE MEASURING PH
   delay(measurement_time);// wait untill the pH sensor has finished the measurement
 
+  // PH MEASUREMENT PHASE
+
+  // add here the code to measure the ph with the probe (build a proper PH measurement function or class)
+
   // EMPTY THE CHAMBER
+
+  if (valves_linked) {
+
+    e_valves.turnON(); // activate the valves
+
+    delay(2000); //wait untill the valves are fully opened
+  };
+
   p_pump.turnON('LOW'); // activate the rotation in the opposite direction
   delay(activation_time);// wait untill emptied
   p_pump.turnOFF();
+
   if (valves_linked) {
       delay(2000); // wait untill the pump has fully stopped
       e_valves.turnOFF() // close the valves
-
   };
 
   //SLEEP
