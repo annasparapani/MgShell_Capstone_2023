@@ -42,6 +42,8 @@
 #include <DHT.h> // management of DHT series sensors 
 #include <DHT_U.h>
 #include <LiquidCrystal_I2C.h> // manages communication with LCD crystal that uses I2C protocol
+#include <SPI.h>
+#include <SD.h>
 
 // Definitions for CO2 sensor
 #define ONE_WIRE_BUS 2 
@@ -113,6 +115,7 @@ void serialEvent_pH(){
   input_string_pH_complete=true; 
 }
 
+
 void read_CO2(){
   c = czr.CO2()*multiplier;
   lcd.clear();
@@ -124,6 +127,12 @@ void read_CO2(){
   lcd.setCursor(11, 0); 
   lcd.print(threshold);
   lcd.print("%");  
+
+  datafile=SD.open("CO2.txt",FILE_WRITE)
+    if (datafile) {
+      datafile.println(c);
+      datafile.close();
+    }
 }
 
 void read_humidity(){
@@ -137,6 +146,12 @@ void read_humidity(){
   digitalWrite(led_red,LOW);
   digitalWrite(led_green,LOW);
   digitalWrite(solenoid, LOW);
+
+    datafile=SD.open("Humidity.txt",FILE_WRITE)
+    if (datafile) {
+      datafile.println(h);
+      datafile.close();
+    }
 }
 
 void read_temperature(){
@@ -146,6 +161,11 @@ void read_temperature(){
   lcd.setCursor(2, 1);  
   lcd.print(t);
   lcd.print(" C");
+    datafile=SD.open("Temperature.txt",FILE_WRITE)
+    if (datafile) {
+      datafile.println(t);
+      datafile.close();
+    }
 }
 
 
@@ -167,12 +187,20 @@ void read_pH(){
   if (sensor_string_pH_complete == true) {               //if a string from the Atlas Scientific product has been received in its entirety
       Serial.println(sensor_string_pH);                   //send that string to the PC's serial monitor
       if (isdigit(sensor_string_pH[0])) {                 //if the first character in the string is a digit, we convert it to a float 
-      pH = sensor_string_pH.toFloat(); 
-      lcd.setCursor(0, 2);
-      lcd.print("pH:"); 
-      lcd.setCursor(5, 2);  
-      lcd.print(pH);
-    }
+        
+        pH = sensor_string_pH.toFloat(); 
+        lcd.setCursor(0, 2);
+        lcd.print("pH:"); 
+        lcd.setCursor(5, 2);  
+        lcd.print(pH);
+        
+        datafile=SD.open("pH.txt",FILE_WRITE)             // if the string is recieved we also save it in the SD
+        if (datafile) {
+          datafile.println(pH);
+          datafile.close();
+        }        
+      }
+
   }
 }
 
@@ -230,7 +258,7 @@ void loop() {
   Serial.print("Hello! I have been on for: "); 
   Serial.print(filling_time); 
   Serial.print("ms \n"); 
-  //******************** SENSORS READINGS *****************
+  //******************** SENSORS READINGS & SAVINGS *****************
   read_CO2();
   read_humidity(); 
   read_temperature(); 
