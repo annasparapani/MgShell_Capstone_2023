@@ -127,12 +127,6 @@ void read_CO2(){
   lcd.setCursor(11, 0); 
   lcd.print(threshold);
   lcd.print("%");  
-
-  datafile=SD.open("CO2.txt",FILE_WRITE)
-    if (datafile) {
-      datafile.println(c);
-      datafile.close();
-    }
 }
 
 void read_humidity(){
@@ -146,12 +140,6 @@ void read_humidity(){
   digitalWrite(led_red,LOW);
   digitalWrite(led_green,LOW);
   digitalWrite(solenoid, LOW);
-
-    datafile=SD.open("Humidity.txt",FILE_WRITE)
-    if (datafile) {
-      datafile.println(h);
-      datafile.close();
-    }
 }
 
 void read_temperature(){
@@ -161,11 +149,6 @@ void read_temperature(){
   lcd.setCursor(2, 1);  
   lcd.print(t);
   lcd.print(" C");
-    datafile=SD.open("Temperature.txt",FILE_WRITE)
-    if (datafile) {
-      datafile.println(t);
-      datafile.close();
-    }
 }
 
 
@@ -186,19 +169,12 @@ void read_pH(){
 
   if (sensor_string_pH_complete == true) {               //if a string from the Atlas Scientific product has been received in its entirety
       Serial.println(sensor_string_pH);                   //send that string to the PC's serial monitor
-      if (isdigit(sensor_string_pH[0])) {                 //if the first character in the string is a digit, we convert it to a float 
-        
+      if (isdigit(sensor_string_pH[0])) {                 //if the first character in the string is a digit, we convert it to a float  
         pH = sensor_string_pH.toFloat(); 
         lcd.setCursor(0, 2);
         lcd.print("pH:"); 
         lcd.setCursor(5, 2);  
-        lcd.print(pH);
-        
-        datafile=SD.open("pH.txt",FILE_WRITE)             // if the string is recieved we also save it in the SD
-        if (datafile) {
-          datafile.println(pH);
-          datafile.close();
-        }        
+        lcd.print(pH);        
       }
 
   }
@@ -217,6 +193,30 @@ void print_measures(){
 
   Serial.print(" pH= ");
   Serial.println(pH);*/
+}
+
+void save_measures(){
+ datafile=SD.open("CO2.txt",FILE_WRITE);
+    if (datafile) {
+      datafile.println(c);
+      datafile.close();
+    }
+  datafile=SD.open("Humidity.txt",FILE_WRITE);
+    if (datafile) {
+      datafile.println(h);
+      datafile.close();
+    }
+  datafile=SD.open("Temperature.txt",FILE_WRITE);
+    if (datafile) {
+      datafile.println(t);
+      datafile.close();
+    }
+  datafile=SD.open("pH.txt",FILE_WRITE)            
+  if (datafile) {
+    datafile.println(pH);
+    datafile.close();
+  };
+
 }
 
 //********** SETUP AND LOOP **************
@@ -263,6 +263,7 @@ void loop() {
   read_humidity(); 
   read_temperature(); 
   read_pH(); 
+  save_measures();
   print_measures(); 
 
   /************************ CO2 CONTROL ***************************************
