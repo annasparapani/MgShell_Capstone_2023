@@ -17,7 +17,8 @@ class pump {
     char pump State; // debugger helps see in whitch state the pump is
     unsigned char pumpROT; // set the direction of the pump rotation
     pump(int pwm);
-    void turnON(char pumpROT);
+    int pwm_ON
+    void turnON(char pumpROT, int pwm_ON);
     void turnOFF();
     int getState();
 
