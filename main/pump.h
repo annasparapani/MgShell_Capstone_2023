@@ -8,7 +8,6 @@
 
 class pump {
   private:
-    int pwm;
     
     int directionPin = 12;
     int pwmPin = 3;
@@ -16,7 +15,6 @@ class pump {
   public:
     char pump State; // debugger helps see in whitch state the pump is
     unsigned char pumpROT; // set the direction of the pump rotation
-    pump(int pwm);
     int pwm_ON
     void turnON(char pumpROT, int pwm_ON);
     void turnOFF();
