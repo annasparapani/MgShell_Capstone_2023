@@ -4,10 +4,7 @@
 
 #include "pump.h"
 
-pump::pump(int pwm) {
-
-
-  Pumppwm = pwm; // initialize pwm
+pump::pump() {
   
   pumpState = 'OFF' // Initially the pump is off untill it's activated
 
@@ -15,14 +12,16 @@ pump::pump(int pwm) {
   int directionPin = 12; 
   int pwmPin = 3;
   int brakePin = 9;
+  
   pinMode(directionPin, OUTPUT);
   pinMode(pwmPin, OUTPUT);
   pinMode(brakePin, OUTPUT);  
 }
 
-void pump::turnON(char pumpROT) {
+void pump::turnON(char pumpROT, int pwm_ON) {
   ROT = pumpROT;
   pumpState= 'ON';
+  
   // Set pump direction --> activate pump
   digitalWrite(directionPin,ROT);
 
@@ -30,7 +29,7 @@ void pump::turnON(char pumpROT) {
   digitalWrite(brakePin, LOW);
 
   //set work duty for the motor
-  analogWrite(pwmPin, pwm);
+  analogWrite(pwmPin, pwm_ON);
 
 
 }
