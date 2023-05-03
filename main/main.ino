@@ -12,7 +12,7 @@ int measurement_time= 3000;
 int sleep_time = 10000;
 bool valves_linked = true;
 
-pump p_pump(pwm); // create a pump object  with a set pwm
+pump p_pump(); // create a pump object  
 valves e_valves(); // create a valves object
 
 
@@ -30,7 +30,19 @@ void loop() {
     delay(2000); //wait untill the valves are fully opened
   };
 
-  p_pump.turnON('HIGH'); // activate the rotation in one direction
+  // ACTIVATE THE PUMP WITH THE PROPER CYCLE (MODULATION OF PWM)
+  
+  // gradual increment
+  p_pump.turnON('HIGH',pwm*0.25); // activate the rotation in one direction (25%)
+  delay(2000)
+  p_pump.turnON('HIGH',pwm*0.5); // activate the rotation in one direction (50%)
+  delay(2000)     
+  p_pump.turnON('HIGH',pwm*0.75); // activate the rotation in one direction (75%)
+  delay(2000)  
+  p_pump.turnON('HIGH',pwm); // activate the rotation in one direction (100%)
+  delay(2000)  
+  
+  // FILL THE TANK
   delay(activation_time)) // wait untill filled
   p_pump.turnOFF();
 
@@ -55,8 +67,18 @@ void loop() {
 
     delay(2000); //wait untill the valves are fully opened
   };
+  
+  // gradual increment ACTIVATE THE PUMP
+  p_pump.turnON('LOW',pwm*0.25); // activate the rotation in one direction (25%)
+  delay(2000)
+  p_pump.turnON('LOW',pwm*0.5); // activate the rotation in one direction (50%)
+  delay(2000)     
+  p_pump.turnON('LOW',pwm*0.75); // activate the rotation in one direction (75%)
+  delay(2000)  
+  p_pump.turnON('LOW',pwm); // activate the rotation in one direction (100%)
+  delay(2000) 
 
-  p_pump.turnON('LOW'); // activate the rotation in the opposite direction
+    
   delay(activation_time);// wait untill emptied
   p_pump.turnOFF();
 
