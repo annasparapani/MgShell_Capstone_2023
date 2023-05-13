@@ -32,8 +32,14 @@
   rowPins_m[4] # 33, 35, 37,39 : connect to the row pinouts of the keypad
   colPins_m[1] # 47: connect to the column pinouts of the keypad
   ---- for pH sensing WE ADD  
- pin #3: Rx from pH 
- pin #4: Tx from pH 
+   pin #3: Rx from pH 
+   pin #4: Tx from pH 
+ 
+  --- for SD we add
+  pin# 50 for MISO
+  pin# 51 for MOSI 
+  pin# 52 for SCK
+  pin# 53 FOR CS
 */
 
 //************ LIBREARIES AND DEFINITIONS ******************
@@ -241,6 +247,17 @@ void setup() {
   // LCD INITIALIZATION 
   lcd.init();
   LCD_setup(); 
+   
+ // SD INITIALIZATION
+   Serial.begin(9600);
+
+  Serial.print("SD Card init... \n");
+  //test if wiring is correct
+  if (!SD.begin(53)) {
+    Serial.println("init failed.. (There may be no card inserted or wrong connections)");
+    while (1);
+  }
+  Serial.println("init ok");
 
   Serial.print("I have finished setting up! ready to go \n ");
 
