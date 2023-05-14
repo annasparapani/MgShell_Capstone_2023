@@ -20,7 +20,7 @@ We remind you that all contents of this folder are protected by an **Non Disclos
 **Both Setups**
 - [x] Code for reading the sensors
 - [x] Code for saving data into the SD card 
-- [ ] Time the SD saving (once, twice a day?)
+- [x] Time the SD saving (once, twice a day?)
 
 **Plan B - Flowloop**
 - [x] Code for controlling the pump 
