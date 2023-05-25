@@ -58,8 +58,8 @@ SoftwareSerial c_serial(12, 13); // creates serial connection between CO2 sensor
 COZIR czr(&c_serial);
 
 // Definitions for pH sensor
-#define rx_pH 3 // on port 3 
-#define tx_pH 4 // on port 4 
+#define rx_pH 15 // on port 15 (rx 3) 
+#define tx_pH 14 // on port 4 (tx 3)
 SoftwareSerial ph_serial(rx_pH, tx_pH); // creates serial connection between pH sensor and Arduino
 
 // Degintion for DHT sensor (humidity and temperature)
@@ -93,6 +93,7 @@ float c=0;
 float t=0; 
 int h=0; 
 float pH; 
+File datafile;
 
 // Skipping the definition of the buttons and keys -> not used in the code
 
@@ -120,7 +121,6 @@ void serialEvent_pH(){
   input_string_pH = Serial.readStringUntil(13); 
   input_string_pH_complete=true; 
 }
-
 
 void read_CO2(){
   c = czr.CO2()*multiplier;
@@ -182,27 +182,16 @@ void read_pH(){
         lcd.setCursor(5, 2);  
         lcd.print(pH);        
       }
-
   }
 }
 
 void print_measures(){
   Serial.print("  CO2  | Temp | Humid | pH \n");        
   Serial.println((String)" "+c+"  | "+t+" |  "+h+"    | "+pH+" "); 
-
-
-  /*Serial.print(" Temp= ");
-  Serial.print(t);
-
-  Serial.print(" Umid= ");
-  Serial.println(h);
-
-  Serial.print(" pH= ");
-  Serial.println(pH);*/
 }
 
 void save_measures(){
- datafile=SD.open("CO2.txt",FILE_WRITE);
+  datafile=SD.open("CO2.txt",FILE_WRITE);
     if (datafile) {
       datafile.println(c);
       datafile.close();
@@ -217,17 +206,15 @@ void save_measures(){
       datafile.println(t);
       datafile.close();
     }
-  datafile=SD.open("pH.txt",FILE_WRITE)            
+  datafile=SD.open("pH.txt",FILE_WRITE);            
   if (datafile) {
     datafile.println(pH);
     datafile.close();
   };
-
 }
 
 //********** SETUP AND LOOP **************
 void setup() {
-  // put your setup code here, to run once:
   // SERIAL CONNECTIONS INITIALIZATION
   Serial.begin(9600);
   Serial.print("Hello! I'm setting up, wait a moment please\n "); 
@@ -251,14 +238,13 @@ void setup() {
  // SD INITIALIZATION
    Serial.begin(9600);
 
-  Serial.print("SD Card init... \n");
+  Serial.print("SD Card initialization \n");
   //test if wiring is correct
   if (!SD.begin(53)) {
-    Serial.println("init failed.. (There may be no card inserted or wrong connections)");
+    Serial.println("SD card initialization failed (There may be no card inserted or wrong connections)");
     while (1);
   }
   Serial.println("init ok");
-
   Serial.print("I have finished setting up! ready to go \n ");
 
   delay(5000); // leave some time before getting into the code, so that the user can read info on the LCD
@@ -280,7 +266,7 @@ void loop() {
   read_humidity(); 
   read_temperature(); 
   read_pH(); 
-  save_measures();
+  //save_measures();
   print_measures(); 
 
   /************************ CO2 CONTROL ***************************************
