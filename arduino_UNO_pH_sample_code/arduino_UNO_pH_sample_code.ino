@@ -8,8 +8,8 @@
 
 
 #include <SoftwareSerial.h>                           //we have to include the SoftwareSerial library, or else we can't use it
-#define rx 2                                          //define what pin rx is going to be
-#define tx 3                                          //define what pin tx is going to be
+#define rx 5                                          //define what pin rx is going to be
+#define tx 6                                          //define what pin tx is going to be
 
 SoftwareSerial myserial(rx, tx);                      //define how the soft serial port is going to work
 
@@ -27,12 +27,14 @@ void setup() {                                        //set up the hardware
   myserial.begin(9600);                               //set baud rate for the software serial port to 9600
   inputstring.reserve(10);                            //set aside some bytes for receiving data from the PC
   sensorstring.reserve(30);                           //set aside some bytes for receiving data from Atlas Scientific product
+  Serial.print("setup successful \n");
 }
 
 
 void serialEvent() {                                  //if the hardware serial port_0 receives a char
   inputstring = Serial.readStringUntil(13);           //read the string until we see a <CR>
   input_string_complete = true;                       //set the flag used to tell if we have received a completed string from the PC
+  Serial.print("received character from pc serial\n");
 }
 
 
@@ -40,21 +42,27 @@ void loop() {                                         //here we go...
 
   if (input_string_complete == true) {                //if a string from the PC has been received in its entirety
     myserial.print(inputstring);                      //send that string to the Atlas Scientific product
-    myserial.print('\r');                             //add a <CR> to the end of the string
+    //myserial.print('\r');                             //add a <CR> to the end of the string
+    // try to add this manually
     inputstring = "";                                 //clear the string
     input_string_complete = false;                    //reset the flag used to tell if we have received a completed string from the PC
+    Serial.print("Arduino sent character to pH EZO\n");
   }
 
   if (myserial.available() > 0) {                     //if we see that the Atlas Scientific product has sent a character
+    Serial.print("Arduino got a string from pH EZO");
     char inchar = (char)myserial.read();              //get the char we just received
     sensorstring += inchar;                           //add the char to the var called sensorstring
+    // if it's I2C it's not getting anything here! 
     if (inchar == '\r') {                             //if the incoming character is a <CR>
       sensor_string_complete = true;                  //set the flag
     }
+    Serial.print("Arduino received char from sensor\n");
   }
 
 
   if (sensor_string_complete == true) {               //if a string from the Atlas Scientific product has been received in its entirety
+    Serial.print("\n ph measure : ");
     Serial.println(sensorstring);                     //send that string to the PC's serial monitor
     
     /*                                                //uncomment this section to see how to convert the pH reading from a string to a float 
