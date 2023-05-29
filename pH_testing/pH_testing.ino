@@ -28,17 +28,14 @@
 
 //************ LIBREARIES AND DEFINITIONS ******************
 #include <SoftwareSerial.h> // serial communication with LCD screen and pH sensor EVO board
-#include <LiquidCrystal_I2C.h> // manages communication with LCD crystal that uses I2C protocol
 #include <SD.h>
+#include <TimeLib.h>   // Include the TimeLib library if you're using an RTC module
 
 // Definitions for pH sensor
 #define rx_pH 10 // on port 10 rx from pH 
 #define tx_pH 11 // on port 11 tx from pH 
 SoftwareSerial ph_serial(rx_pH, tx_pH); // creates serial connection between pH sensor and Arduino
 
-
-// Definitions for LCD display 
-LiquidCrystal_I2C lcd(0x27, 16, 2); // creates the display variable with its dimensions
 
 // *************** GLOBAL VARIABLES ****************
 int count=0; 
@@ -51,6 +48,8 @@ float pH;
 int sec_on=0;
 int min_on=0;
 int hr_on=0; 
+unsigned long previousReadingTime = 0;
+const unsigned long readingInterval = 10000; // 1800000 = 30 minutes interval (in milliseconds)
 bool measure_flag=0; 
 File datafile;
 
@@ -64,6 +63,7 @@ void read_pH(){
     Serial.print("\n");
     Serial.print("pH values read and flag lowered\n");
     sensor_string_pH="";
+    save_measures();
 }
 
 void serialEvent() { // COMMUNICATION with PC Serial
@@ -74,18 +74,25 @@ void serialEvent() { // COMMUNICATION with PC Serial
   Serial.print("\n");
 }
 
-void print_measures(){
-  Serial.print("pH: ");
-  Serial.print(pH);
-  Serial.print("\n");       
-}
-
 void save_measures(){
+  Serial.print("Saving measures on SD\n");
+  time_t currentT = now(); // Get the current time
+  tmElements_t tm; // Create a tmElements_t struct to hold the date and time
+  breakTime(currentT, tm); // Break down the time_t value into its components
+  String currentDate = String(tm.Day)+ "/" + tm.Month + "/" + tm.Year + 1970;
+  String currentTime = String(tm.Hour) + ":" + tm.Minute + ":" + tm.Second;
+  String dataString = currentDate + "; " + currentTime + "; " + String(pH);
+
   datafile=SD.open("pH.txt",FILE_WRITE);            
   if (datafile) {
-    datafile.println(pH);
+    datafile.println(dataString);
     datafile.close();
   }
+
+  Serial.print("String saved on the SD card in PH.txt: ");
+  Serial.print(dataString); 
+  Serial.print("\n --------------------------------------- \n"); 
+  dataString=""; 
 }
 
 //********** SETUP AND LOOP **************
@@ -100,7 +107,8 @@ void setup(){
   //attachInterrupt(digitalPinToInterrupt(10), pH_rx_serialInterrupt, FALLING); // attach interrupt to the RX coming from the sensor
 
   // pH SENSOR INITIALIZATION
-  ph_serial.print("C,0\r");// turn off continuos measuring of the sensor 
+  ph_serial.print('C,0\r');// turn off continuos measuring of the sensor 
+
    
   // SD INITIALIZATION
   //test if wiring is correct
@@ -111,16 +119,25 @@ void setup(){
     Serial.println("Initialization ok \n");
     }
   Serial.print("I have finished setting up! ready to go \n ");
-
-  delay(5000); // leave some time before getting into the code, so that the user can read info on the LCD
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 
   // ***************** TIME ON EVALUATION *****************
-  long filling_time=millis(); // returns the number of milliseconds since the arduino board was powered or reset, 32-bit unsigned int (enough for our times)
-  sec_on++;  
+  long currentMillis=millis(); // returns the number of milliseconds since the arduino board was powered or reset, 32-bit unsigned int (enough for our times)
+  
+  if (currentMillis - previousReadingTime >= readingInterval) {
+    // It's time to take a pH reading
+    previousReadingTime = currentMillis;
+
+    // SENDING FROM ARDUINO TO pH EZO BOARD
+    input_string_pH = "R"; // Send "R" to initiate the reading process
+    input_string_pH_complete = true;
+    Serial.println("----------------------------- \n Scheduled pH reading triggered \n ");
+  }
+  
+  sec_on++;
   if(sec_on >= 60){  // time variables to keep track of for how long we've been on 
     min_on++;
     sec_on=0;
@@ -167,14 +184,6 @@ void loop() {
       sensor_string_pH="";
     }
 
-  }
-
-  if ( min_on == 30 || min_on == 60 ){ // every 30 minutes does an automatic measure and saves the values
-    measure_flag=1; 
-    ph_serial.print('R\r');   //tell sensor to take a single measurement
-    delay(3000);
-    save_measures();
-    print_measures(); 
   }
   delay(1000); 
 }
