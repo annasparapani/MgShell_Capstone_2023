@@ -64,7 +64,7 @@ COZIR czr(&c_serial);
 #define tx_pH 11 // on port 4 
 SoftwareSerial ph_serial(rx_pH, tx_pH); // creates serial connection between pH sensor and Arduino
 
-// Degintion for DHT sensor (humidity and temperature)
+// Defintion for DHT sensor (humidity and temperature)
 DHT dht(2, DHT11); // on port 2 
 
 // Definitions for LCD display 
@@ -231,8 +231,7 @@ void save_measures(){
       saving_pH=false;
     }
     datafile.close();
-  };
-
+  }
 }
 
 //********** SETUP AND LOOP **************
@@ -305,7 +304,6 @@ void loop() {
     input_string_pH_complete = true;
     //Serial.println("----------------------------- \n Scheduled pH reading triggered \n ");
  
-    
     read_CO2();
     read_humidity(); 
     read_temperature(); 
