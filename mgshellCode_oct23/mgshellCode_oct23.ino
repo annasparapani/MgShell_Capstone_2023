@@ -1,13 +1,8 @@
 /* FILE: MGSHELL INCUBATOR CODE
   AUTHOR: Anna Sparapani, Gianluca De Francheschi
   DATE: 10-23
-
+  ********************************************************
   TO DO: 
-  [ ] add the SD saving part (take from incubator_redone_2.0.ino)
-  [ ] add the CO2 solenoid control (take from incubator_redone_2.0.ino)
-      build a function to keep the main cleaner than in take from incubator_redone_2.0.ino
-  [ ] if hardware avaiable, write code for displaying measures on the LCD display (currently
-      displaying on serial monitor but needs a computer connected)
   [ ] change the forwarding in SerialEvent() so that the characters coming from the USB serial (PC)
       are forwared to the ph_serial only if the first character is not an 'A' (because when it's an 'A')
       we are using the new added protocol and switching on / off the automatic reading instead of 
@@ -16,7 +11,7 @@
   **************  CODE DESCRITPION **********************
   This is an edited code, which improves the code developed within the Capstone Projects (@PoliMi) for MgShell.
   MgShell provided its previous version which did not include pH sensing, the code developed during the project 
-  and submitted in June 2023 added the pH sensing and the current code (October 2023) is an update which improves
+  and submitted in June 2023 added the pH sensing. While the current code (October 2023) is an update which improves
   the communication between the PC and the pH sensor, and introduces: 
   1. communication with the pH sensor (pH EZO by Atlas Scientific) with forwarding of eveything
      that is sent to Arduino through the PC (USB) serial port to the pH sensor. In this way the code allows to 
