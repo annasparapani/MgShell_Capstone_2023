@@ -102,6 +102,8 @@ unsigned long previousReadingTime = 0;
 const unsigned long readingInterval = 10000; // 1800000 = 30 minutes interval (in milliseconds)
 bool measure_flag=0;
 
+// TIMER
+starting_time=millis()
 
 
 // Skipping the definition of the buttons and keys -> not used in the code
@@ -201,17 +203,15 @@ void save_measures(){
   Serial.print("Saving measures on SD\n");
 
   // TAKE A TIME STAMP //
-  time_t currentT = now(); // Get the current time
-  tmElements_t tm; // Create a tmElements_t struct to hold the date and time
-  breakTime(currentT, tm); // Break down the time_t value into its components
-  String currentDate = String(tm.Day)+ "/" + tm.Month + "/" + tm.Year + 2023;
-  String currentTime = String(tm.Hour) + ":" + tm.Minute + ":" + tm.Second;
-  String dataString = currentDate + "; " + currentTime + "; " ;
+saving_time=millis();
+time=saving_time-starting_time;
+String dataString = String(time + " ");
+   
 
   // SAVE DATA INTO THE PROPER FILES //
  datafile = SD.open("CO2.txt",FILE_WRITE);
     if (datafile && !saving_pH ) {
-      datafile.println(dataString + String(c));
+      datafile.println(dataString  String(c));
       datafile.close();
     }
   datafile = SD.open("Humidity.txt",FILE_WRITE);
