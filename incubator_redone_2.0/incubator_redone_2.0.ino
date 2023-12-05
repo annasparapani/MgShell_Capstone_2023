@@ -205,7 +205,7 @@ void save_measures(){
   // TAKE A TIME STAMP //
 saving_time=millis();
 time=saving_time-starting_time;
-String dataString = String(time + " ");
+//String dataString = String(time + " ");
    
 
   // SAVE DATA INTO THE PROPER FILES //
@@ -224,7 +224,14 @@ String dataString = String(time + " ");
       datafile.println(dataString + String(t));
       datafile.close();
     }
-  datafile = SD.open("pH.txt",FILE_WRITE);           
+  datafile = SD.open("pH.txt",FILE_WRITE);  
+   
+  datafile = SD.open("Time.txt",FILE_WRITE);
+    if (datafile && !saving_pH ) {
+      datafile.println(dataString);
+      datafile.close();
+    }
+  datafile = SD.open("pH.txt",FILE_WRITE);     
   if (datafile) {
     if (measure_flag && (isdigit(sensor_string_pH[0]))){
       datafile.println(dataString + String(pH));
