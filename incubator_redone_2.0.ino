@@ -204,7 +204,7 @@ void save_measures(){
   Serial.print("Saving measures on SD\n");
 
   // TAKE A TIME STAMP //
-saving_time=millis();
+saving_time=millis(); // millis() returns an unsigned long
 unsigned long time=saving_time;
 String dataString = String(" ");
    
@@ -228,7 +228,16 @@ String dataString = String(" ");
    
   datafile = SD.open("Time.txt",FILE_WRITE);
     if (datafile && !saving_pH ) {
-      datafile.println(dataString + String(time));
+      //******************************************************************** added this -> converting to string first 
+      char timeStr[20]; // Adjust the size based on your needs
+      dtostrf(time, 10, 0, timeStr); // 10 is the width, adjust as needed
+      datafile.println(dataString + String(timeStr));
+      /* NOTE 
+         File Size: Keep in mind that using millis() for time will eventually overflow after approximately 50 days,
+         so if your project runs continuously for extended periods, you might want to consider other timekeeping 
+         methods or handle the rollover case. */
+      //********************************************************************* end addition 
+      //datafile.println(dataString + String(time));
       datafile.close();
     }
   datafile = SD.open("pH.txt",FILE_WRITE);     
@@ -294,7 +303,7 @@ void loop() {
   digitalWrite(10, LOW); 
 
   // put your main code here, to run repeatedly:
-  long filling_time=millis(); // returns the number of milliseconds since the arduino board was powered or reset, 32-bit unsigned int (enough for our times)
+  unsigned long filling_time=millis(); // returns the number of milliseconds since the arduino board was powered or reset, 32-bit unsigned int (enough for our times)
 
   /*Serial.print("Hello! I have been on for: "); 
   Serial.print(filling_time); 
@@ -302,7 +311,7 @@ void loop() {
   */
 //******************** SENSORS READINGS & SAVINGS *****************
 
-  long currentMillis=millis();
+  unsigned long currentMillis=millis();
   if (currentMillis - previousReadingTime >= readingInterval) {
     // It's time to take a reading
     previousReadingTime = currentMillis;
